@@ -529,14 +529,41 @@
         }
 
         function saveProgress() {
-            // 因為在 Claude.ai 環境中不支援 localStorage，
-            // 這裡使用記憶體存儲，重新整理頁面後會重置
-            console.log('進度已保存到記憶體中');
+            try {
+                localStorage.setItem('dogBreedsProgress', JSON.stringify(Array.from(completedBreeds)));
+                console.log('進度已保存到本地儲存');
+            } catch (error) {
+                console.log('無法保存進度:', error);
+            }
         }
 
         function loadProgress() {
-            // 在實際環境中，這裡會從 localStorage 載入進度
-            console.log('從記憶體載入進度');
+            try {
+                const saved = localStorage.getItem('dogBreedsProgress');
+                if (saved) {
+                    const savedBreeds = JSON.parse(saved);
+                    completedBreeds = new Set(savedBreeds);
+                    console.log('已載入保存的進度:', savedBreeds.length, '個品種');
+                    
+                    // 更新UI中的勾選狀態
+                    setTimeout(() => {
+                        completedBreeds.forEach(breed => {
+                            const items = document.querySelectorAll('.breed-item');
+                            items.forEach(item => {
+                                const nameElement = item.querySelector('.breed-name');
+                                const checkbox = item.querySelector('.breed-checkbox');
+                                if (nameElement && nameElement.textContent === breed) {
+                                    checkbox.checked = true;
+                                    item.classList.add('completed');
+                                }
+                            });
+                        });
+                        updateStats();
+                    }, 100);
+                }
+            } catch (error) {
+                console.log('無法載入進度:', error);
+            }
         }
 
         // 搜尋功能
