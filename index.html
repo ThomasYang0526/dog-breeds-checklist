@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>世界狗狗品種清單 - 影片製作追蹤</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .stats {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+
+        .stat-number {
+            background: #007bff;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 1.1em;
+        }
+
+        .search-box {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: #007bff;
+        }
+
+        .breeds-container {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .breed-group {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .breed-group:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .group-header {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 1.2em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .breed-list {
+            padding: 20px;
+        }
+
+        .breed-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+
+        .breed-item:last-child {
+            border-bottom: none;
+        }
+
+        .breed-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .breed-checkbox {
+            width: 18px;
+            height: 18px;
+            margin-right: 15px;
+            cursor: pointer;
+            accent-color: #28a745;
+        }
+
+        .breed-name {
+            flex: 1;
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+
+        .breed-item.completed {
+            background-color: #d4edda;
+            opacity: 0.8;
+        }
+
+        .breed-item.completed .breed-name {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .clear-all {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+            transition: all 0.3s;
+        }
+
+        .clear-all:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .breeds-container {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            
+            .stats {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐕 世界狗狗品種清單</h1>
+            <p>追蹤您的狗狗影片製作進度</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span>總品種數：</span>
+                <span class="stat-number" id="totalCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span>已完成：</span>
+                <span class="stat-number" id="completedCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span>完成率：</span>
+                <span class="stat-number" id="progressPercent">0%</span>
+            </div>
+        </div>
+
+        <div class="search-box">
+            <input type="text" class="search-input" id="searchInput" placeholder="🔍 搜尋狗狗品種...">
+        </div>
+
+        <div class="breeds-container" id="breedsContainer">
+            <!-- 狗狗品種將由 JavaScript 動態生成 -->
+        </div>
+    </div>
+
+    <button class="clear-all" onclick="clearAllChecks()">清除所有勾選</button>
+
+    <script>
+        const dogBreeds = {
+            "工作犬類": [
+                "阿拉斯加雪橇犬 (Alaskan Malamute)",
+                "西伯利亞哈士奇 (Siberian Husky)",
+                "薩摩耶犬 (Samoyed)",
+                "聖伯納犬 (Saint Bernard)",
+                "紐芬蘭犬 (Newfoundland)",
+                "大丹犬 (Great Dane)",
+                "杜賓犬 (Doberman Pinscher)",
+                "拳師犬 (Boxer)",
+                "羅威納犬 (Rottweiler)",
+                "巨型雪納瑞 (Giant Schnauzer)",
+                "葡萄牙水犬 (Portuguese Water Dog)",
+                "阿根廷杜高犬 (Dogo Argentino)",
+                "大白熊犬 (Great Pyrenees)",
+                "卡斯楚拉布拉多犬 (Cane Corso)",
+                "馬士提夫犬 (Mastiff)",
+                "那不勒斯獒犬 (Neapolitan Mastiff)"
+            ],
+            "牧羊犬類": [
+                "德國牧羊犬 (German Shepherd)",
+                "邊境牧羊犬 (Border Collie)",
+                "澳洲牧羊犬 (Australian Shepherd)",
+                "比利時牧羊犬 (Belgian Shepherd)",
+                "荷蘭牧羊犬 (Dutch Shepherd)",
+                "古代英國牧羊犬 (Old English Sheepdog)",
+                "澳洲牧牛犬 (Australian Cattle Dog)",
+                "威爾士柯基犬 (Welsh Corgi)",
+                "彭布羅克威爾士柯基 (Pembroke Welsh Corgi)",
+                "卡迪根威爾士柯基 (Cardigan Welsh Corgi)",
+                "設德蘭牧羊犬 (Shetland Sheepdog)",
+                "芬蘭拉普獵犬 (Finnish Lapphund)",
+                "冰島牧羊犬 (Icelandic Sheepdog)",
+                "波蘭低地牧羊犬 (Polish Lowland Sheepdog)"
+            ],
+            "獵犬類": [
+                "拉布拉多犬 (Labrador Retriever)",
+                "黃金獵犬 (Golden Retriever)",
+                "英國可卡犬 (English Cocker Spaniel)",
+                "美國可卡犬 (American Cocker Spaniel)",
+                "英國史賓格犬 (English Springer Spaniel)",
+                "愛爾蘭雪達犬 (Irish Setter)",
+                "英國雪達犬 (English Setter)",
+                "戈登雪達犬 (Gordon Setter)",
+                "指示犬 (Pointer)",
+                "德國短毛指示犬 (German Shorthaired Pointer)",
+                "德國長毛指示犬 (German Longhaired Pointer)",
+                "維茲拉犬 (Vizsla)",
+                "威瑪獵犬 (Weimaraner)",
+                "布列塔尼犬 (Brittany)",
+                "新斯科舍誘鴨尋回犬 (Nova Scotia Duck Tolling Retriever)",
+                "平毛尋回犬 (Flat-Coated Retriever)",
+                "捲毛尋回犬 (Curly-Coated Retriever)",
+                "乞沙比克灣尋回犬 (Chesapeake Bay Retriever)"
+            ],
+            "獵狐獵兔犬類": [
+                "比格犬 (Beagle)",
+                "巴吉度獵犬 (Basset Hound)",
+                "血獵犬 (Bloodhound)",
+                "米格魯犬 (Beagle)",
+                "獵狐犬 (Foxhound)",
+                "美國獵狐犬 (American Foxhound)",
+                "英國獵狐犬 (English Foxhound)",
+                "哈利犬 (Harrier)",
+                "奧達獵犬 (Otterhound)",
+                "黑褐獵犬 (Black and Tan Coonhound)",
+                "藍色提克獵犬 (Bluetick Coonhound)",
+                "紅骨獵犬 (Redbone Coonhound)",
+                "樹行者獵犬 (Treeing Walker Coonhound)"
+            ],
+            "玩具犬類": [
+                "吉娃娃 (Chihuahua)",
+                "約克夏犬 (Yorkshire Terrier)",
+                "馬爾濟斯犬 (Maltese)",
+                "博美犬 (Pomeranian)",
+                "蝴蝶犬 (Papillon)",
+                "巴哥犬 (Pug)",
+                "北京犬 (Pekingese)",
+                "日本狆犬 (Japanese Chin)",
+                "哈瓦那犬 (Havanese)",
+                "騎士查理王小獵犬 (Cavalier King Charles Spaniel)",
+                "查理王小獵犬 (King Charles Spaniel)",
+                "中國冠毛犬 (Chinese Crested)",
+                "義大利灰獵犬 (Italian Greyhound)",
+                "玩具曼徹斯特犬 (Toy Manchester Terrier)",
+                "絲毛犬 (Silky Terrier)",
+                "布魯塞爾格里芬犬 (Brussels Griffon)"
+            ],
+            "梗犬類": [
+                "傑克羅素梗 (Jack Russell Terrier)",
+                "西高地白梗 (West Highland White Terrier)",
+                "蘇格蘭梗 (Scottish Terrier)",
+                "萬能梗 (Airedale Terrier)",
+                "牛頭梗 (Bull Terrier)",
+                "史塔佛郡牛頭梗 (Staffordshire Bull Terrier)",
+                "美國史塔佛郡梗 (American Staffordshire Terrier)",
+                "貝德林頓梗 (Bedlington Terrier)",
+                "邊境梗 (Border Terrier)",
+                "凱恩梗 (Cairn Terrier)",
+                "丹第丁蒙梗 (Dandie Dinmont Terrier)",
+                "狐狸梗 (Fox Terrier)",
+                "愛爾蘭梗 (Irish Terrier)",
+                "凱利藍梗 (Kerry Blue Terrier)",
+                "湖畔梗 (Lakeland Terrier)",
+                "曼徹斯特梗 (Manchester Terrier)",
+                "諾里奇梗 (Norwich Terrier)",
+                "諾福克梗 (Norfolk Terrier)",
+                "帕森羅素梗 (Parson Russell Terrier)",
+                "軟毛麥色梗 (Soft Coated Wheaten Terrier)",
+                "威爾士梗 (Welsh Terrier)",
+                "線毛獵狐梗 (Wire Fox Terrier)",
+                "平毛獵狐梗 (Smooth Fox Terrier)"
+            ],
+            "非運動犬類": [
+                "法國鬥牛犬 (French Bulldog)",
+                "英國鬥牛犬 (English Bulldog)",
+                "貴賓犬 (Poodle)",
+                "標準貴賓犬 (Standard Poodle)",
+                "迷你貴賓犬 (Miniature Poodle)",
+                "玩具貴賓犬 (Toy Poodle)",
+                "比熊犬 (Bichon Frise)",
+                "鬆獅犬 (Chow Chow)",
+                "大麥町犬 (Dalmatian)",
+                "芬蘭史匹茲犬 (Finnish Spitz)",
+                "法國鬥牛犬 (French Bulldog)",
+                "荷蘭毛獅犬 (Keeshond)",
+                "拉薩犬 (Lhasa Apso)",
+                "西藏獵犬 (Tibetan Spaniel)",
+                "西藏梗 (Tibetan Terrier)",
+                "美國愛斯基摩犬 (American Eskimo Dog)",
+                "波士頓梗 (Boston Terrier)",
+                "中國沙皮犬 (Chinese Shar-Pei)",
+                "芬蘭史匹茲犬 (Finnish Spitz)",
+                "羅德西亞脊背犬 (Rhodesian Ridgeback)"
+            ],
+            "視覺獵犬類": [
+                "格雷伊獵犬 (Greyhound)",
+                "惠比特犬 (Whippet)",
+                "義大利灰獵犬 (Italian Greyhound)",
+                "阿富汗獵犬 (Afghan Hound)",
+                "薩路基犬 (Saluki)",
+                "俄羅斯狼犬 (Borzoi)",
+                "愛爾蘭獵狼犬 (Irish Wolfhound)",
+                "蘇格蘭獵鹿犬 (Scottish Deerhound)",
+                "法老王獵犬 (Pharaoh Hound)",
+                "伊比莎獵犬 (Ibizan Hound)",
+                "巴仙吉犬 (Basenji)",
+                "阿澤瓦克犬 (Azawakh)",
+                "匈牙利靈緹犬 (Magyar Agar)",
+                "斯盧伊犬 (Sloughi)"
+            ],
+            "東方犬種": [
+                "柴犬 (Shiba Inu)",
+                "秋田犬 (Akita)",
+                "日本狆犬 (Japanese Chin)",
+                "日本狐狸犬 (Japanese Spitz)",
+                "甲斐犬 (Kai Ken)",
+                "紀州犬 (Kishu Ken)",
+                "四國犬 (Shikoku)",
+                "北海道犬 (Hokkaido)",
+                "韓國珍島犬 (Korean Jindo)",
+                "泰國脊背犬 (Thai Ridgeback)",
+                "中華田園犬 (Chinese Rural Dog)",
+                "西藏獒犬 (Tibetan Mastiff)",
+                "拉薩犬 (Lhasa Apso)",
+                "西藏梗 (Tibetan Terrier)",
+                "西藏獵犬 (Tibetan Spaniel)"
+            ],
+            "北歐犬種": [
+                "挪威獵鹿犬 (Norwegian Elkhound)",
+                "挪威布哈德犬 (Norwegian Buhund)",
+                "挪威倫德獵犬 (Norwegian Lundehund)",
+                "冰島犬 (Icelandic Sheepdog)",
+                "芬蘭史匹茲犬 (Finnish Spitz)",
+                "芬蘭拉普獵犬 (Finnish Lapphund)",
+                "瑞典獵鹿犬 (Swedish Elkhound)",
+                "瑞典瓦漢犬 (Swedish Vallhund)",
+                "卡累利阿熊犬 (Karelian Bear Dog)",
+                "挪威黑獵鹿犬 (Black Norwegian Elkhound)"
+            ],
+            "稀有犬種": [
+                "巴辛吉犬 (Basenji)",
+                "新幾內亞歌唱犬 (New Guinea Singing Dog)",
+                "墨西哥無毛犬 (Xoloitzcuintli)",
+                "祕魯無毛犬 (Peruvian Hairless Dog)",
+                "卡塔赫納狗 (Catalburun)",
+                "泰來犬 (Telomian)",
+                "卡洛萊納犬 (Carolina Dog)",
+                "澳洲野犬 (Australian Dingo)",
+                "新幾內亞野犬 (New Guinea Wild Dog)",
+                "非洲野犬後代 (African Wild Dog Hybrid)"
+            ]
+        };
+
+        let completedBreeds = new Set();
+
+        function initializeBreeds() {
+            const container = document.getElementById('breedsContainer');
+            container.innerHTML = '';
+
+            Object.entries(dogBreeds).forEach(([category, breeds]) => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'breed-group';
+                
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'group-header';
+                headerDiv.textContent = `${category} (${breeds.length})`;
+                
+                const listDiv = document.createElement('div');
+                listDiv.className = 'breed-list';
+                
+                breeds.forEach(breed => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'breed-item';
+                    itemDiv.setAttribute('data-breed', breed.toLowerCase());
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'breed-checkbox';
+                    checkbox.addEventListener('change', (e) => toggleBreed(breed, e.target.checked));
+                    
+                    const label = document.createElement('span');
+                    label.className = 'breed-name';
+                    label.textContent = breed;
+                    label.addEventListener('click', () => {
+                        checkbox.checked = !checkbox.checked;
+                        toggleBreed(breed, checkbox.checked);
+                    });
+                    
+                    itemDiv.appendChild(checkbox);
+                    itemDiv.appendChild(label);
+                    listDiv.appendChild(itemDiv);
+                });
+                
+                groupDiv.appendChild(headerDiv);
+                groupDiv.appendChild(listDiv);
+                container.appendChild(groupDiv);
+            });
+
+            updateStats();
+        }
+
+        function toggleBreed(breed, isCompleted) {
+            const item = document.querySelector(`[data-breed="${breed.toLowerCase()}"]`);
+            
+            if (isCompleted) {
+                completedBreeds.add(breed);
+                item.classList.add('completed');
+            } else {
+                completedBreeds.delete(breed);
+                item.classList.remove('completed');
+            }
+            
+            updateStats();
+            saveProgress();
+        }
+
+        function updateStats() {
+            const totalCount = Object.values(dogBreeds).flat().length;
+            const completedCount = completedBreeds.size;
+            const progressPercent = Math.round((completedCount / totalCount) * 100);
+            
+            document.getElementById('totalCount').textContent = totalCount;
+            document.getElementById('completedCount').textContent = completedCount;
+            document.getElementById('progressPercent').textContent = progressPercent + '%';
+        }
+
+        function clearAllChecks() {
+            if (confirm('確定要清除所有勾選嗎？')) {
+                completedBreeds.clear();
+                document.querySelectorAll('.breed-checkbox').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                document.querySelectorAll('.breed-item').forEach(item => {
+                    item.classList.remove('completed');
+                });
+                updateStats();
+                saveProgress();
+            }
+        }
+
+        function saveProgress() {
+            // 因為在 Claude.ai 環境中不支援 localStorage，
+            // 這裡使用記憶體存儲，重新整理頁面後會重置
+            console.log('進度已保存到記憶體中');
+        }
+
+        function loadProgress() {
+            // 在實際環境中，這裡會從 localStorage 載入進度
+            console.log('從記憶體載入進度');
+        }
+
+        // 搜尋功能
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const breedItems = document.querySelectorAll('.breed-item');
+            const breedGroups = document.querySelectorAll('.breed-group');
+            
+            breedItems.forEach(item => {
+                const breedName = item.getAttribute('data-breed');
+                if (breedName.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // 隱藏沒有匹配項目的分組
+            breedGroups.forEach(group => {
+                const visibleItems = group.querySelectorAll('.breed-item[style="display: flex"], .breed-item:not([style])');
+                const hasVisibleItems = Array.from(visibleItems).some(item => 
+                    !item.style.display || item.style.display === 'flex'
+                );
+                
+                if (searchTerm === '' || hasVisibleItems) {
+                    group.style.display = 'block';
+                } else {
+                    group.style.display = 'none';
+                }
+            });
+        });
+
+        // 初始化頁面
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProgress();
+            initializeBreeds();
+        });
+    </script>
+</body>
+</html>
