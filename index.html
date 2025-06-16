@@ -451,7 +451,6 @@
                 breeds.forEach(breed => {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'breed-item';
-                    itemDiv.setAttribute('data-breed', breed.toLowerCase());
                     
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
@@ -480,14 +479,25 @@
         }
 
         function toggleBreed(breed, isCompleted) {
-            const item = document.querySelector(`[data-breed="${breed.toLowerCase()}"]`);
+            // 找到對應的項目 - 直接通過文字內容查找
+            const items = document.querySelectorAll('.breed-item');
+            let targetItem = null;
             
-            if (isCompleted) {
-                completedBreeds.add(breed);
-                item.classList.add('completed');
-            } else {
-                completedBreeds.delete(breed);
-                item.classList.remove('completed');
+            items.forEach(item => {
+                const nameElement = item.querySelector('.breed-name');
+                if (nameElement && nameElement.textContent === breed) {
+                    targetItem = item;
+                }
+            });
+            
+            if (targetItem) {
+                if (isCompleted) {
+                    completedBreeds.add(breed);
+                    targetItem.classList.add('completed');
+                } else {
+                    completedBreeds.delete(breed);
+                    targetItem.classList.remove('completed');
+                }
             }
             
             updateStats();
@@ -532,37 +542,44 @@
         // 搜尋功能
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase().trim();
-            const breedItems = document.querySelectorAll('.breed-item');
+            console.log('搜尋詞:', searchTerm); // 調試用
+            
             const breedGroups = document.querySelectorAll('.breed-group');
             
             if (searchTerm === '') {
                 // 如果搜尋框為空，顯示所有項目
-                breedItems.forEach(item => {
-                    item.style.display = 'flex';
-                });
                 breedGroups.forEach(group => {
                     group.style.display = 'block';
+                    const breedItems = group.querySelectorAll('.breed-item');
+                    breedItems.forEach(item => {
+                        item.style.display = 'flex';
+                    });
                 });
                 return;
             }
             
-            breedItems.forEach(item => {
-                const breedNameElement = item.querySelector('.breed-name');
-                const breedName = breedNameElement.textContent.toLowerCase();
-                
-                if (breedName.includes(searchTerm)) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-            
-            // 檢查每個分組是否有可見的項目
+            // 遍歷每個分組
             breedGroups.forEach(group => {
-                const breedList = group.querySelector('.breed-list');
-                const visibleItems = breedList.querySelectorAll('.breed-item[style="display: flex"]');
+                const breedItems = group.querySelectorAll('.breed-item');
+                let hasVisibleItems = false;
                 
-                if (visibleItems.length > 0) {
+                breedItems.forEach(item => {
+                    const breedNameElement = item.querySelector('.breed-name');
+                    if (breedNameElement) {
+                        const breedName = breedNameElement.textContent.toLowerCase();
+                        console.log('檢查品種:', breedName); // 調試用
+                        
+                        if (breedName.includes(searchTerm)) {
+                            item.style.display = 'flex';
+                            hasVisibleItems = true;
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    }
+                });
+                
+                // 如果這個分組有可見項目，顯示分組；否則隱藏
+                if (hasVisibleItems) {
                     group.style.display = 'block';
                 } else {
                     group.style.display = 'none';
