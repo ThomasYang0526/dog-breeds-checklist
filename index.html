@@ -531,12 +531,25 @@
 
         // 搜尋功能
         document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
+            const searchTerm = e.target.value.toLowerCase().trim();
             const breedItems = document.querySelectorAll('.breed-item');
             const breedGroups = document.querySelectorAll('.breed-group');
             
+            if (searchTerm === '') {
+                // 如果搜尋框為空，顯示所有項目
+                breedItems.forEach(item => {
+                    item.style.display = 'flex';
+                });
+                breedGroups.forEach(group => {
+                    group.style.display = 'block';
+                });
+                return;
+            }
+            
             breedItems.forEach(item => {
-                const breedName = item.getAttribute('data-breed');
+                const breedNameElement = item.querySelector('.breed-name');
+                const breedName = breedNameElement.textContent.toLowerCase();
+                
                 if (breedName.includes(searchTerm)) {
                     item.style.display = 'flex';
                 } else {
@@ -544,14 +557,12 @@
                 }
             });
             
-            // 隱藏沒有匹配項目的分組
+            // 檢查每個分組是否有可見的項目
             breedGroups.forEach(group => {
-                const visibleItems = group.querySelectorAll('.breed-item[style="display: flex"], .breed-item:not([style])');
-                const hasVisibleItems = Array.from(visibleItems).some(item => 
-                    !item.style.display || item.style.display === 'flex'
-                );
+                const breedList = group.querySelector('.breed-list');
+                const visibleItems = breedList.querySelectorAll('.breed-item[style="display: flex"]');
                 
-                if (searchTerm === '' || hasVisibleItems) {
+                if (visibleItems.length > 0) {
                     group.style.display = 'block';
                 } else {
                     group.style.display = 'none';
